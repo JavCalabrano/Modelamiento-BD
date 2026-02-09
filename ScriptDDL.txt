@@ -1,0 +1,420 @@
+-- Generado por Oracle SQL Developer Data Modeler 24.3.1.351.0831
+--   en:        2026-02-09 19:21:38 CLST
+--   sitio:      Oracle Database 11g
+--   tipo:      Oracle Database 11g
+
+
+
+-- predefined type, no DDL - MDSYS.SDO_GEOMETRY
+
+-- predefined type, no DDL - XMLTYPE
+
+CREATE TABLE BOLETA 
+    ( 
+     nro_boleta         NUMBER (5)  NOT NULL , 
+     fecha_boleta       DATE  NOT NULL , 
+     SUCURSAL_sigla     CHAR (4)  NOT NULL , 
+     CLIENTE_id_cliente NUMBER (6)  NOT NULL 
+    ) 
+;
+
+ALTER TABLE BOLETA 
+    ADD CONSTRAINT BOLETA_PK PRIMARY KEY ( nro_boleta, SUCURSAL_sigla ) ;
+
+CREATE TABLE CLIENTE 
+    ( 
+     id_cliente        NUMBER (6)  NOT NULL , 
+     nombre_primer     VARCHAR2 (20)  NOT NULL , 
+     nombre_segundo    VARCHAR2 (20) , 
+     apellido_p        VARCHAR2 (20)  NOT NULL , 
+     apellido_m        VARCHAR2 (20)  NOT NULL , 
+     telefono          NUMBER (9)  NOT NULL , 
+     COMUNA_cod_comuna NUMBER (3) 
+    ) 
+;
+
+ALTER TABLE CLIENTE 
+    ADD CONSTRAINT CLIENTE_PK PRIMARY KEY ( id_cliente ) ;
+
+CREATE TABLE COMUNA 
+    ( 
+     cod_comuna       NUMBER (3)  NOT NULL , 
+     nombre           VARCHAR2 (20)  NOT NULL , 
+     REGION_id_region NUMBER (2)  NOT NULL 
+    ) 
+;
+
+ALTER TABLE COMUNA 
+    ADD CONSTRAINT COMUNA_PK PRIMARY KEY ( cod_comuna ) ;
+
+CREATE TABLE DETALLE_BOLETA 
+    ( 
+     BOLETA_nro_boleta   NUMBER (5)  NOT NULL , 
+     BOLETA_sigla        CHAR (4)  NOT NULL , 
+     MODELO_id_modelo    NUMBER (9)  NOT NULL , 
+     MODELO_nombre_marca VARCHAR2 (15)  NOT NULL , 
+     cantidad_producto   NUMBER (2)  NOT NULL 
+    ) 
+;
+
+ALTER TABLE DETALLE_BOLETA 
+    ADD CONSTRAINT DETALLE_BOLETA_PK PRIMARY KEY ( BOLETA_nro_boleta, BOLETA_sigla, MODELO_id_modelo, MODELO_nombre_marca ) ;
+
+CREATE TABLE EMPRESA 
+    ( 
+     rut    VARCHAR2 (8)  NOT NULL , 
+     nombre VARCHAR2 (20)  NOT NULL 
+    ) 
+;
+
+ALTER TABLE EMPRESA 
+    ADD CONSTRAINT EMPRESA_PK PRIMARY KEY ( rut ) ;
+
+CREATE TABLE MARCA 
+    ( 
+     nombre_marca VARCHAR2 (15)  NOT NULL 
+    ) 
+;
+
+ALTER TABLE MARCA 
+    ADD CONSTRAINT MARCA_PK PRIMARY KEY ( nombre_marca ) ;
+
+CREATE TABLE MODELO 
+    ( 
+     id_modelo                   NUMBER (9)  NOT NULL , 
+     PRODUCTO_MARCA_nombre_marca VARCHAR2 (15)  NOT NULL , 
+     descripcion_modelo          VARCHAR2 (50)  NOT NULL , 
+     nro_boleta                  NUMBER (5)  NOT NULL , 
+     sigla                       CHAR (4)  NOT NULL , 
+     PRODUCTO_id_producto        NUMBER (9)  NOT NULL 
+    ) 
+;
+
+COMMENT ON COLUMN MODELO.id_modelo IS 'Identificado por el SKU' 
+;
+
+ALTER TABLE MODELO 
+    ADD CONSTRAINT MODELO_PK PRIMARY KEY ( id_modelo, PRODUCTO_MARCA_nombre_marca ) ;
+
+CREATE TABLE PERSONA_NATURAL 
+    ( 
+     rut            VARCHAR2 (8)  NOT NULL , 
+     nombre_primero VARCHAR2 (20)  NOT NULL , 
+     nombre_segundo VARCHAR2 (20) , 
+     apellido_p     VARCHAR2 (20)  NOT NULL , 
+     apellido_m     VARCHAR2 (20)  NOT NULL 
+    ) 
+;
+
+ALTER TABLE PERSONA_NATURAL 
+    ADD CONSTRAINT PERSONA_NATURAL_PK PRIMARY KEY ( rut ) ;
+
+CREATE TABLE PRODUCTO 
+    ( 
+     id_producto        NUMBER (9)  NOT NULL , 
+     nombre_producto    VARCHAR2 (20)  NOT NULL , 
+     descripcion        VARCHAR2 (200)  NOT NULL , 
+     fecha_vencimiento  DATE , 
+     categoria_producto NUMBER (3) , 
+     precio_unitario    NUMBER (7)  NOT NULL , 
+     MARCA_nombre_marca VARCHAR2 (15)  NOT NULL 
+    ) 
+;
+
+COMMENT ON COLUMN PRODUCTO.id_producto IS 'identificados por codigo SKU' 
+;
+
+ALTER TABLE PRODUCTO 
+    ADD CONSTRAINT PRODUCTO_PK PRIMARY KEY ( id_producto, MARCA_nombre_marca ) ;
+
+CREATE TABLE PROVEEDOR 
+    ( 
+     rut               VARCHAR2 (8)  NOT NULL , 
+     dv                CHAR (1)  NOT NULL , 
+     telefono          NUMBER (12)  NOT NULL , 
+     calle_dirección   VARCHAR2 (15)  NOT NULL , 
+     num_calle         NUMBER (5)  NOT NULL , 
+     email             VARCHAR2 (50)  NOT NULL , 
+     website           VARCHAR2 (50) , 
+     cod_postal        NUMBER (10) , 
+     COMUNA_cod_comuna NUMBER (3) 
+    ) 
+;
+
+ALTER TABLE PROVEEDOR 
+    ADD CONSTRAINT PROVEEDOR_PK PRIMARY KEY ( rut ) ;
+
+CREATE TABLE REGION 
+    ( 
+     id_region     NUMBER (2)  NOT NULL , 
+     nombre_region VARCHAR2 (15)  NOT NULL 
+    ) 
+;
+
+ALTER TABLE REGION 
+    ADD CONSTRAINT REGION_PK PRIMARY KEY ( id_region ) ;
+
+CREATE TABLE SUCURSAL 
+    ( 
+     sigla             CHAR (4)  NOT NULL , 
+     nombre            VARCHAR2 (15)  NOT NULL , 
+     COMUNA_cod_comuna NUMBER (3) 
+    ) 
+;
+
+ALTER TABLE SUCURSAL 
+    ADD CONSTRAINT SUCURSAL_PK PRIMARY KEY ( sigla ) ;
+
+ALTER TABLE BOLETA 
+    ADD CONSTRAINT BOLETA_CLIENTE_FK FOREIGN KEY 
+    ( 
+     CLIENTE_id_cliente
+    ) 
+    REFERENCES CLIENTE 
+    ( 
+     id_cliente
+    ) 
+;
+
+ALTER TABLE BOLETA 
+    ADD CONSTRAINT BOLETA_SUCURSAL_FK FOREIGN KEY 
+    ( 
+     SUCURSAL_sigla
+    ) 
+    REFERENCES SUCURSAL 
+    ( 
+     sigla
+    ) 
+;
+
+ALTER TABLE CLIENTE 
+    ADD CONSTRAINT CLIENTE_COMUNA_FK FOREIGN KEY 
+    ( 
+     COMUNA_cod_comuna
+    ) 
+    REFERENCES COMUNA 
+    ( 
+     cod_comuna
+    ) 
+;
+
+ALTER TABLE COMUNA 
+    ADD CONSTRAINT COMUNA_REGION_FK FOREIGN KEY 
+    ( 
+     REGION_id_region
+    ) 
+    REFERENCES REGION 
+    ( 
+     id_region
+    ) 
+;
+
+ALTER TABLE DETALLE_BOLETA 
+    ADD CONSTRAINT DETALLE_BOLETA_BOLETA_FK FOREIGN KEY 
+    ( 
+     BOLETA_nro_boleta,
+     BOLETA_sigla
+    ) 
+    REFERENCES BOLETA 
+    ( 
+     nro_boleta,
+     SUCURSAL_sigla
+    ) 
+;
+
+ALTER TABLE DETALLE_BOLETA 
+    ADD CONSTRAINT DETALLE_BOLETA_MODELO_FK FOREIGN KEY 
+    ( 
+     MODELO_id_modelo,
+     MODELO_nombre_marca
+    ) 
+    REFERENCES MODELO 
+    ( 
+     id_modelo,
+     PRODUCTO_MARCA_nombre_marca
+    ) 
+;
+
+ALTER TABLE EMPRESA 
+    ADD CONSTRAINT EMPRESA_PROVEEDOR_FK FOREIGN KEY 
+    ( 
+     rut
+    ) 
+    REFERENCES PROVEEDOR 
+    ( 
+     rut
+    ) 
+;
+
+ALTER TABLE MODELO 
+    ADD CONSTRAINT MODELO_PRODUCTO_FK FOREIGN KEY 
+    ( 
+     PRODUCTO_id_producto,
+     PRODUCTO_MARCA_nombre_marca
+    ) 
+    REFERENCES PRODUCTO 
+    ( 
+     id_producto,
+     MARCA_nombre_marca
+    ) 
+;
+
+ALTER TABLE PERSONA_NATURAL 
+    ADD CONSTRAINT PERSONA_NATURAL_PROVEEDOR_FK FOREIGN KEY 
+    ( 
+     rut
+    ) 
+    REFERENCES PROVEEDOR 
+    ( 
+     rut
+    ) 
+;
+
+ALTER TABLE PRODUCTO 
+    ADD CONSTRAINT PRODUCTO_MARCA_FK FOREIGN KEY 
+    ( 
+     MARCA_nombre_marca
+    ) 
+    REFERENCES MARCA 
+    ( 
+     nombre_marca
+    ) 
+;
+
+ALTER TABLE PROVEEDOR 
+    ADD CONSTRAINT PROVEEDOR_COMUNA_FK FOREIGN KEY 
+    ( 
+     COMUNA_cod_comuna
+    ) 
+    REFERENCES COMUNA 
+    ( 
+     cod_comuna
+    ) 
+;
+
+ALTER TABLE SUCURSAL 
+    ADD CONSTRAINT SUCURSAL_COMUNA_FK FOREIGN KEY 
+    ( 
+     COMUNA_cod_comuna
+    ) 
+    REFERENCES COMUNA 
+    ( 
+     cod_comuna
+    ) 
+;
+
+CREATE OR REPLACE TRIGGER FKNTM_BOLETA 
+BEFORE UPDATE OF CLIENTE_id_cliente 
+ON BOLETA 
+BEGIN 
+  raise_application_error(-20225,'Non Transferable FK constraint  on table BOLETA is violated'); 
+END; 
+/
+
+CREATE OR REPLACE TRIGGER FKNTO_CLIENTE 
+BEFORE UPDATE OF COMUNA_cod_comuna 
+ON CLIENTE 
+FOR EACH ROW 
+BEGIN 
+ IF :old.COMUNA_cod_comuna IS NOT NULL THEN 
+  raise_application_error(-20225,'Non Transferable FK constraint CLIENTE_COMUNA_FK on table CLIENTE is violated'); 
+ END IF; 
+END; 
+/
+
+CREATE OR REPLACE TRIGGER FKNTM_COMUNA 
+BEFORE UPDATE OF REGION_id_region 
+ON COMUNA 
+BEGIN 
+  raise_application_error(-20225,'Non Transferable FK constraint  on table COMUNA is violated'); 
+END; 
+/
+
+CREATE OR REPLACE TRIGGER FKNTM_MODELO 
+BEFORE UPDATE OF PRODUCTO_id_producto, PRODUCTO_MARCA_nombre_marca 
+ON MODELO 
+BEGIN 
+  raise_application_error(-20225,'Non Transferable FK constraint  on table MODELO is violated'); 
+END; 
+/
+
+CREATE OR REPLACE TRIGGER FKNTM_PRODUCTO 
+BEFORE UPDATE OF MARCA_nombre_marca 
+ON PRODUCTO 
+BEGIN 
+  raise_application_error(-20225,'Non Transferable FK constraint  on table PRODUCTO is violated'); 
+END; 
+/
+
+CREATE OR REPLACE TRIGGER FKNTO_SUCURSAL 
+BEFORE UPDATE OF COMUNA_cod_comuna 
+ON SUCURSAL 
+FOR EACH ROW 
+BEGIN 
+ IF :old.COMUNA_cod_comuna IS NOT NULL THEN 
+  raise_application_error(-20225,'Non Transferable FK constraint SUCURSAL_COMUNA_FK on table SUCURSAL is violated'); 
+ END IF; 
+END; 
+/
+
+CREATE OR REPLACE TRIGGER FKNTM_DETALLE_BOLETA 
+BEFORE UPDATE OF BOLETA_nro_boleta, BOLETA_sigla, MODELO_id_modelo, MODELO_nombre_marca 
+ON DETALLE_BOLETA 
+BEGIN 
+  raise_application_error(-20225,'Non Transferable FK constraint  on table DETALLE_BOLETA is violated'); 
+END; 
+/
+
+--  ERROR: No Discriminator Column found in Arc FKArc_3 - constraint trigger for Arc cannot be generated 
+
+--  ERROR: No Discriminator Column found in Arc FKArc_3 - constraint trigger for Arc cannot be generated
+
+--  ERROR: No Discriminator Column found in Arc Arc_1 - constraint trigger for Arc cannot be generated 
+
+--  ERROR: No Discriminator Column found in Arc Arc_1 - constraint trigger for Arc cannot be generated
+
+
+
+-- Informe de Resumen de Oracle SQL Developer Data Modeler: 
+-- 
+-- CREATE TABLE                            12
+-- CREATE INDEX                             0
+-- ALTER TABLE                             24
+-- CREATE VIEW                              0
+-- ALTER VIEW                               0
+-- CREATE PACKAGE                           0
+-- CREATE PACKAGE BODY                      0
+-- CREATE PROCEDURE                         0
+-- CREATE FUNCTION                          0
+-- CREATE TRIGGER                           7
+-- ALTER TRIGGER                            0
+-- CREATE COLLECTION TYPE                   0
+-- CREATE STRUCTURED TYPE                   0
+-- CREATE STRUCTURED TYPE BODY              0
+-- CREATE CLUSTER                           0
+-- CREATE CONTEXT                           0
+-- CREATE DATABASE                          0
+-- CREATE DIMENSION                         0
+-- CREATE DIRECTORY                         0
+-- CREATE DISK GROUP                        0
+-- CREATE ROLE                              0
+-- CREATE ROLLBACK SEGMENT                  0
+-- CREATE SEQUENCE                          0
+-- CREATE MATERIALIZED VIEW                 0
+-- CREATE MATERIALIZED VIEW LOG             0
+-- CREATE SYNONYM                           0
+-- CREATE TABLESPACE                        0
+-- CREATE USER                              0
+-- 
+-- DROP TABLESPACE                          0
+-- DROP DATABASE                            0
+-- 
+-- REDACTION POLICY                         0
+-- 
+-- ORDS DROP SCHEMA                         0
+-- ORDS ENABLE SCHEMA                       0
+-- ORDS ENABLE OBJECT                       0
+-- 
+-- ERRORS                                   4
+-- WARNINGS                                 0
+
